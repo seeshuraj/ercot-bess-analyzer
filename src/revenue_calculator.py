@@ -99,7 +99,7 @@ def calculate_revenue_stack(
         'peak_arbitrage_day': merged.loc[merged['energy_arbitrage'].idxmax(), 'date'] if not merged.empty else None,
         'avg_daily_revenue': merged['total_revenue'].mean(),
         'max_daily_revenue': merged['total_revenue'].max(),
-        'min_daily_revenue': merged['total_daily_revenue'].min()
+        'min_daily_revenue': merged['total_revenue'].min()
     }
     
     return merged, summary
