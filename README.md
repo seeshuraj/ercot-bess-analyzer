@@ -4,7 +4,7 @@
 
 **Demo:** Streamlit dashboard showing revenue breakdown, price duration curves, and $/kW-month metrics.
 
-![Dashboard Preview](assets/screenshot.png)
+![Dashboard Preview](Result/Output-1.png)
 
 ## Quickstart
 
