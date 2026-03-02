@@ -4,7 +4,7 @@
 
 **Demo:** Streamlit dashboard showing revenue breakdown, price duration curves, and $/kW-month metrics.
 
-![Dashboard Preview](https://via.placeholder.com/800x400?text=ERCOT+BESS+Revenue+Analyzer)
+![Dashboard Preview](assets/screenshot.png)
 
 ## Quickstart
 
@@ -27,7 +27,7 @@ streamlit run app.py
 ## Features
 
 - **Energy Arbitrage Simulation**: Perfect-foresight dispatch using threshold-based heuristic
-- **Ancillary Services Revenue**: Capacity payment model for Reg Up, Reg Down, Non-Spin, RRS
+- **Ancillary Services Revenue**: Capacity payment model (optimal single product selection)
 - **Revenue Stacking**: Combined daily revenue from both streams
 - **Price Duration Curve**: Visualize price volatility
 - **Configurable Battery**: Adjust capacity, duration, RTE, and AS reserve fraction
@@ -51,10 +51,12 @@ Perfect-foresight dispatch simulation using threshold approach:
 - Subject to State-of-Charge constraints
 
 ### Ancillary Services
-Capacity payment model:
-- Revenue = AS clearing price × MW committed × 24 hours × 85% availability factor
+Capacity payment model - **simplified approach**:
+- In ERCOT, a battery cannot be simultaneously committed to all AS products
+- This model selects the highest-clearing AS product each day
+- Revenue = Best AS clearing price × MW committed × 24 hours × 85% availability factor
 
-**Note:** This is an upper-bound benchmark. Real operators use day-ahead price forecasts, not actual prices. Modo's Benchmarking Pro uses similar methodology for historical analysis.
+**Note:** This is an upper-bound benchmark. Real operators use day-ahead price forecasts and co-optimize across AS products hourly. Modo's Benchmarking Pro uses similar methodology for historical analysis.
 
 ## Key Findings (Last 30 Days)
 
@@ -70,6 +72,7 @@ Based on synthetic data modeling typical ERCOT patterns:
 ```
 ercot-bess-analyzer/
 ├── README.md
+├── resume.pdf             # Applicant resume
 ├── requirements.txt
 ├── app.py                  # Streamlit dashboard
 ├── src/
@@ -77,9 +80,7 @@ ercot-bess-analyzer/
 │   ├── synthetic_data.py  # Realistic synthetic market data
 │   ├── dispatch_model.py  # Battery dispatch logic
 │   └── revenue_calculator.py  # Revenue stacking
-├── data/                  # Cached data (gitignored)
-└── notebooks/
-    └── 01_exploration.ipynb  # EDA (to be added)
+└── data/                  # Cached data (gitignored)
 ```
 
 ## Data Sources
@@ -92,6 +93,7 @@ ercot-bess-analyzer/
 ## Limitations & Future Work
 
 - **Perfect foresight**: Real optimization uses day-ahead forecasts
+- **Simplified AS dispatch**: Assumes optimal single product selection per day; real dispatch co-optimizes hourly
 - **Simplified dispatch**: Could use LP/MPC for better results
 - **No degradation**: Battery degradation not modeled
 - **Fixed AS split**: Could optimize dynamic capacity allocation

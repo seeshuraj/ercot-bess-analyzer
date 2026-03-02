@@ -7,12 +7,52 @@ from datetime import datetime, timedelta
 def fetch_spp(date="30 days ago", end="today", location="HB_NORTH"):
     """
     Fetch Real-Time Settlement Point Prices (SPP) for a given location.
-    Uses synthetic data when ERCOT API is unavailable.
+    
+    First attempts to fetch real data from ERCOT via gridstatus.
+    Falls back to synthetic data if API is unavailable.
     """
     print(f"Fetching SPP for {location}...")
-    from src.synthetic_data import get_spp_or_generate
     
-    # Calculate days
+    # Try real data first
+    try:
+        import gridstatus
+        iso = gridstatus.Ercot()
+        
+        # Calculate date range
+        if isinstance(date, str):
+            if "days ago" in date:
+                days = int(date.split()[0])
+            else:
+                days = 30
+        else:
+            days = 30
+        
+        end_dt = datetime.now()
+        start_dt = end_dt - timedelta(days=days)
+        
+        print(f"  Attempting to fetch real ERCOT data...")
+        spp = iso.get_spp(date=start_dt, end=end_dt, market="REAL_TIME_15_MIN")
+        
+        if spp is not None and len(spp) > 0:
+            # Filter to requested location
+            if 'Location' in spp.columns and location != "HB_NORTH":
+                spp = spp[spp['Location'] == location]
+            
+            # Select relevant columns
+            if 'SPP' in spp.columns:
+                spp = spp[['Time', 'SPP']].copy()
+            elif 'Price' in spp.columns:
+                spp = spp[['Time', 'Price']].rename(columns={'Price': 'SPP'})
+            
+            print(f"  ✅ Real ERCOT data fetched: {len(spp)} records")
+            return spp
+            
+    except Exception as e:
+        print(f"  ⚠️ gridstatus fetch failed ({type(e).__name__}), using synthetic data")
+    
+    # Fallback to synthetic data
+    from src.synthetic_data import generate_realistic_spp
+    
     if isinstance(date, str):
         if "days ago" in date:
             days = int(date.split()[0])
@@ -21,15 +61,44 @@ def fetch_spp(date="30 days ago", end="today", location="HB_NORTH"):
     else:
         days = 30
     
-    spp = get_spp_or_generate(days=days, location=location)
-    print(f"  Retrieved {len(spp)} records")
+    spp = generate_realistic_spp(days=days, location=location)
+    print(f"  Generated synthetic data: {len(spp)} records")
     return spp
 
 
 def fetch_as_prices(date="30 days ago", end="today"):
-    """Fetch Ancillary Services clearing prices. Uses synthetic data when unavailable."""
+    """Fetch Ancillary Services clearing prices. Tries gridstatus first, then synthetic."""
     print("Fetching AS prices...")
-    from src.synthetic_data import get_as_prices_or_generate
+    
+    # Try real data first
+    try:
+        import gridstatus
+        iso = gridstatus.Ercot()
+        
+        # Calculate date range
+        if isinstance(date, str):
+            if "days ago" in date:
+                days = int(date.split()[0])
+            else:
+                days = 30
+        else:
+            days = 30
+        
+        end_dt = datetime.now()
+        start_dt = end_dt - timedelta(days=days)
+        
+        print(f"  Attempting to fetch real AS prices...")
+        as_prices = iso.get_as_prices(date=start_dt, end=end_dt)
+        
+        if as_prices is not None and len(as_prices) > 0:
+            print(f"  ✅ Real AS data fetched: {len(as_prices)} records")
+            return as_prices
+            
+    except Exception as e:
+        print(f"  ⚠️ gridstatus AS fetch failed ({type(e).__name__}), using synthetic data")
+    
+    # Fallback to synthetic
+    from src.synthetic_data import generate_realistic_as_prices
     
     if isinstance(date, str):
         if "days ago" in date:
@@ -39,20 +108,23 @@ def fetch_as_prices(date="30 days ago", end="today"):
     else:
         days = 30
     
-    as_prices = get_as_prices_or_generate(days=days)
-    print(f"  Retrieved {len(as_prices)} records")
+    as_prices = generate_realistic_as_prices(days=days)
+    print(f"  Generated synthetic AS data: {len(as_prices)} records")
     return as_prices
 
 
 def load_or_fetch_data(days=30, location="HB_NORTH", force_refresh=False):
     """
     Load cached data or fetch fresh data from ERCOT (or generate realistic synthetic).
+    Uses date-stamped cache files to ensure fresh data.
     """
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     os.makedirs(data_dir, exist_ok=True)
     
-    spp_path = os.path.join(data_dir, f"spp_{location}_{days}days.csv")
-    as_path = os.path.join(data_dir, f"as_prices_{days}days.csv")
+    # Date-stamped cache to avoid stale data
+    today = datetime.now().strftime("%Y%m%d")
+    spp_path = os.path.join(data_dir, f"spp_{location}_{days}days_{today}.csv")
+    as_path = os.path.join(data_dir, f"as_prices_{days}days_{today}.csv")
     
     # Try loading from cache first
     if not force_refresh:

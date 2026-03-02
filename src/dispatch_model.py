@@ -167,6 +167,10 @@ def calc_as_revenue(
     """
     Calculate ancillary services revenue from capacity payments.
     
+    Note: In ERCOT, a battery cannot be simultaneously committed to all AS products.
+    This simplified model assumes the battery commits to the highest-clearing AS product
+    each day. Real dispatch co-optimizes across products hourly.
+    
     Args:
         as_prices: DataFrame with AS prices (Reg Up, Reg Down, Non-Spin, RRS)
         capacity_mw: Battery capacity
@@ -201,19 +205,25 @@ def calc_as_revenue(
     # Calculate daily average prices
     daily_prices = as_df[as_cols].resample('D').mean()
     
-    # Calculate revenue: price ($/MW-hr) * MW committed * 24 hours * availability
-    # Note: AS prices are typically $/MW/hr, so multiply by hours in day
-    daily_revenue = daily_prices.multiply(as_mw * 24 * availability_factor)
+    # FIX: Pick the highest-value AS product per day (not sum of all products)
+    # In ERCOT, battery capacity can only committed to ONE product at a time
+    best_as_price = daily_prices.max(axis=1)
+    best_product = daily_prices.idxmax(axis=1)
     
-    # Sum all AS revenue streams
-    daily_revenue['total_as_revenue'] = daily_revenue.sum(axis=1)
+    # Calculate revenue using the best AS product
+    daily_revenue = pd.DataFrame({
+        'Time': best_as_price.index,
+        'best_as_product': best_product.values,
+        'best_as_price': best_as_price.values,
+        'total_as_revenue': best_as_price.values * as_mw * 24 * availability_factor
+    })
     
-    # Add breakdown columns
+    # Add individual product columns for reference
     for col in as_cols:
-        if col in daily_revenue.columns:
-            daily_revenue[f'{col}_revenue'] = daily_prices[col] * as_mw * 24 * availability_factor
+        if col in daily_prices.columns:
+            daily_revenue[f'{col}_price'] = daily_prices[col].values
     
-    return daily_revenue.reset_index()
+    return daily_revenue
 
 
 if __name__ == "__main__":

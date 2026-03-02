@@ -83,6 +83,7 @@ def calculate_revenue_stack(
     merged['revenue_per_kw'] = merged['total_revenue'] / total_kw
     
     # Calculate summary metrics
+    n_days = len(merged)
     total_energy = merged['energy_arbitrage'].sum()
     total_as = merged['total_as_revenue'].sum()
     total_rev = total_energy + total_as
@@ -91,13 +92,14 @@ def calculate_revenue_stack(
         'total_revenue_30d': total_rev,
         'energy_arbitrage_30d': total_energy,
         'as_revenue_30d': total_as,
-        'revenue_per_kw_month': (total_rev / total_kw) * 30 / 30,  # Monthly rate
+        'revenue_per_kw_month': (total_rev / total_kw) * (30 / n_days),  # Normalized to monthly rate
+        'n_days': n_days,
         'pct_energy': (total_energy / total_rev * 100) if total_rev > 0 else 0,
         'pct_as': (total_as / total_rev * 100) if total_rev > 0 else 0,
         'peak_arbitrage_day': merged.loc[merged['energy_arbitrage'].idxmax(), 'date'] if not merged.empty else None,
         'avg_daily_revenue': merged['total_revenue'].mean(),
         'max_daily_revenue': merged['total_revenue'].max(),
-        'min_daily_revenue': merged['total_revenue'].min()
+        'min_daily_revenue': merged['total_daily_revenue'].min()
     }
     
     return merged, summary
