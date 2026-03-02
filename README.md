@@ -58,21 +58,22 @@ Capacity payment model - **simplified approach**:
 
 **Note:** This is an upper-bound benchmark. Real operators use day-ahead price forecasts and co-optimize across AS products hourly. Modo's Benchmarking Pro uses similar methodology for historical analysis.
 
-## Key Findings (Last 30 Days)
+## Key Findings (Last 30 Days — Synthetic ERCOT Patterns)
 
-Based on synthetic data modeling typical ERCOT patterns:
+Based on a 100 MW / 4hr battery at HB_NORTH with 20% AS reserve:
 
-- Energy arbitrage makes up ~70-80% of total revenue
-- AS revenues have declined significantly since 2023 market saturation
-- Price spikes (scarcity events) drive most arbitrage opportunity
-- Weekend prices typically 15% lower than weekdays
+- **Total revenue:** $X,XXX,XXX over 30 days (~$X.XX/kW-month)
+- **Energy arbitrage:** XX% of total revenue
+- **AS revenue:** XX% of total revenue (Reg Up dominated at avg $X.XX/MW-hr)
+- **Peak arbitrage day:** YYYY-MM-DD at $XX,XXX (price spike event)
+
 
 ## Project Structure
 
 ```
 ercot-bess-analyzer/
 ├── README.md
-├── resume.pdf             # Applicant resume
+├── Resume_Seeshuraj.pdf             # Applicant resume
 ├── requirements.txt
 ├── app.py                  # Streamlit dashboard
 ├── src/
