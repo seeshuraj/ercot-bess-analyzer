@@ -67,7 +67,11 @@ Based on a 100 MW / 4hr battery at HB_NORTH with 20% AS reserve:
 - **AS revenue:** 55% of total revenue (Reg Up dominated at avg $8.50/MW-hr)
 - **Peak arbitrage day:** 2026-02-17 at $46,443 (price spike event)
 
-*Note: Results vary with synthetic data. Run locally for your specific numbers.*
+>  Note: the AS-heavy split (55%) reflects synthetic data calibration. 
+> Real 2025–2026 ERCOT data would show energy arbitrage dominating (~70%+) 
+> due to ~90% decline in ancillary service revenues since 2023 driven by 
+> BESS market saturation and the December 2025 RTC+B market redesign.
+
 
 
 ## Project Structure
