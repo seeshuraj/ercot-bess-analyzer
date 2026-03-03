@@ -62,10 +62,12 @@ Capacity payment model - **simplified approach**:
 
 Based on a 100 MW / 4hr battery at HB_NORTH with 20% AS reserve:
 
-- **Total revenue:** $X,XXX,XXX over 30 days (~$X.XX/kW-month)
-- **Energy arbitrage:** XX% of total revenue
-- **AS revenue:** XX% of total revenue (Reg Up dominated at avg $X.XX/MW-hr)
-- **Peak arbitrage day:** YYYY-MM-DD at $XX,XXX (price spike event)
+- **Total revenue:** $469,460 over 30 days (~$4.69/kW-month)
+- **Energy arbitrage:** 45% of total revenue
+- **AS revenue:** 55% of total revenue (Reg Up dominated at avg $8.50/MW-hr)
+- **Peak arbitrage day:** 2026-02-17 at $46,443 (price spike event)
+
+*Note: Results vary with synthetic data. Run locally for your specific numbers.*
 
 
 ## Project Structure
